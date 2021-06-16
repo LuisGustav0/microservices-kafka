@@ -6,6 +6,7 @@ import feign.Feign;
 import feign.gson.GsonDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -19,6 +20,7 @@ public class SearchCidadeByUfService {
     @Value("${uri-servico-dados-ibge-gov-br}")
     private String uriServicoDadosIbgeGobBr;
 
+    @Cacheable(value = "cidade")
     public List<Cidade> execute(String uf) {
         var startTime = Instant.now();
 

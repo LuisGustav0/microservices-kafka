@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.gatway.model.EstadoRequestTopic;
 import com.microservice.resource.response.CidadeResponse;
-import com.microservice.resource.response.EstadoResponse;
 import com.microservice.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +12,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -63,6 +63,7 @@ public class SearchCidadeByUfService {
         return this.mapper.readValue(consumerRecord.value(), CidadeResponse.class);
     }
 
+    @Cacheable(value = "cidade-principal")
     public CidadeResponse execute(String uf) throws JsonProcessingException, ExecutionException, InterruptedException {
         log.info("SearchCidadeByUfService.execute - Initializer execute");
 

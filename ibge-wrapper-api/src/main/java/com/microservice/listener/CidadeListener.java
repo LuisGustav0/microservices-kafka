@@ -2,9 +2,11 @@ package com.microservice.listener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.gatway.model.Cidade;
 import com.microservice.gatway.model.Estado;
-import com.microservice.gatway.response.EstadoResponse;
-import com.microservice.service.SearchEstadoService;
+import com.microservice.gatway.request.EstadoRequestTopic;
+import com.microservice.gatway.response.CidadeResponse;
+import com.microservice.service.SearchCidadeByUfService;
 import com.microservice.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -18,21 +20,24 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EstadoListener {
+public class CidadeListener {
 
-    private final SearchEstadoService estadoService;
+    private final SearchCidadeByUfService cidadeService;
 
     private final ObjectMapper mapper;
 
-    @KafkaListener(topics = "${kafka.topic.request-topic}")
-    public Message<String> execute(@Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
+    @KafkaListener(topics = "${kafka.topic.request-topic-cidade}")
+    public Message<String> execute(String uf,
+                                   @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
                                    @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) throws JsonProcessingException {
 
         var timeUtil = new TimeUtil();
 
-        List<Estado> listEstado = this.estadoService.execute();
+        EstadoRequestTopic request = mapper.readValue(uf, EstadoRequestTopic.class);
 
-        String jsonReturn = mapper.writeValueAsString(EstadoResponse.builder().result(listEstado).build());
+        List<Cidade> listCidade = this.cidadeService.execute(request.getUf());
+
+        String jsonReturn = mapper.writeValueAsString(CidadeResponse.builder().result(listCidade).build());
 
         timeUtil.showLog("EstadoListener.execute");
 

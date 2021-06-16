@@ -3,6 +3,7 @@ package com.microservice.service.estado;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.gatway.model.EstadoRequestTopic;
+import com.microservice.resource.response.CidadeResponse;
 import com.microservice.resource.response.EstadoResponse;
 import com.microservice.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +25,21 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SearchEstadoService {
+public class SearchCidadeByUfService {
 
     private final ReplyingKafkaTemplate kafkaTemplate;
 
     private final ObjectMapper mapper;
 
-    @Value("${kafka.topic.request-topic}")
+    @Value("${kafka.topic.request-topic-cidade}")
     private String requestTopic;
 
-    @Value("${kafka.topic.requestreply-topic}")
+    @Value("${kafka.topic.requestreply-topic-cidade}")
     private String requestReplyTopic;
 
-    private ProducerRecord<String, String> getProducerRecord() throws JsonProcessingException {
-        log.info("SearchEstadoService.getProducerRecord - Convert json object");
-        var strJson = this.mapper.writeValueAsString(EstadoRequestTopic.builder().build());
+    private ProducerRecord<String, String> getProducerRecord(String uf) throws JsonProcessingException {
+        log.info("SearchCidadeByUfService.getProducerRecord - Convert json object");
+        var strJson = this.mapper.writeValueAsString(EstadoRequestTopic.builder().uf(uf).build());
 
         log.info("SearchEstadoService.getProducerRecord - Assembling record producer to send kafka");
         var producerRecord = new ProducerRecord(requestTopic, strJson);
@@ -51,28 +52,28 @@ public class SearchEstadoService {
         log.info(header.key() + ":" + Arrays.toString(header.value()));
     }
 
-    private EstadoResponse getEstadoResponse(RequestReplyFuture<String, String, String> sendAndReceive) throws JsonProcessingException, ExecutionException, InterruptedException {
-        log.info("SearchEstadoService.getEstadoResponse - Receiving feedback");
+    private CidadeResponse getCidadeResponse(RequestReplyFuture<String, String, String> sendAndReceive) throws JsonProcessingException, ExecutionException, InterruptedException {
+        log.info("SearchCidadeByUfService.getCidadeResponse - Receiving feedback");
 
         SendResult<String, String> sendResult = sendAndReceive.getSendFuture().get();
         sendResult.getProducerRecord().headers().forEach(this::imprimirHeader);
 
         ConsumerRecord<String, String> consumerRecord = sendAndReceive.get();
 
-        return this.mapper.readValue(consumerRecord.value(), EstadoResponse.class);
+        return this.mapper.readValue(consumerRecord.value(), CidadeResponse.class);
     }
 
-    public EstadoResponse execute() throws JsonProcessingException, ExecutionException, InterruptedException {
-        log.info("SearchEstadoService.execute - Initializer execute");
+    public CidadeResponse execute(String uf) throws JsonProcessingException, ExecutionException, InterruptedException {
+        log.info("SearchCidadeByUfService.execute - Initializer execute");
 
         var timeUtil = new TimeUtil();
 
-        var producerRecord = this.getProducerRecord();
+        var producerRecord = this.getProducerRecord(uf);
 
         log.info("SearchEstadoService.execute - Send kafka");
         RequestReplyFuture<String, String, String> sendAndReceive = this.kafkaTemplate.sendAndReceive(producerRecord);
 
-        EstadoResponse response = this.getEstadoResponse(sendAndReceive);
+        CidadeResponse response = this.getCidadeResponse(sendAndReceive);
 
         timeUtil.showLog("SearchEstadoService.execute retorno kafka");
 

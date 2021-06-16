@@ -3,7 +3,7 @@ package com.microservice.service.estado;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.gatway.model.EstadoRequestTopic;
-import com.microservice.gatway.response.EstadoResponse;
+import com.microservice.resource.response.EstadoResponse;
 import com.microservice.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

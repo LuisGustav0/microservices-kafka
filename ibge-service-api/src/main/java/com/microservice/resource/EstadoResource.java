@@ -1,7 +1,7 @@
 package com.microservice.resource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.microservice.gatway.response.EstadoResponse;
+import com.microservice.resource.response.EstadoResponse;
 import com.microservice.service.estado.SearchEstadoService;
 import com.microservice.util.TimeUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class EstadoResource {
     public EstadoResponse search() throws InterruptedException, ExecutionException, JsonProcessingException {
         log.info("EstadoResource.search - Initializer search");
 
-        TimeUtil timeUtil = new TimeUtil();
+        var timeUtil = new TimeUtil();
 
         EstadoResponse response = this.estadoService.execute();
 

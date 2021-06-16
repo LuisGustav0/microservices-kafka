@@ -28,7 +28,7 @@ public class EstadoListener {
     public Message<String> execute(@Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
                                    @Header(KafkaHeaders.CORRELATION_ID) byte[] correlation) throws JsonProcessingException {
 
-        TimeUtil timeUtil = new TimeUtil();
+        var timeUtil = new TimeUtil();
 
         List<Estado> listEstado = this.estadoService.execute();
 
